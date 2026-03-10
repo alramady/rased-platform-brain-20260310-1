@@ -1,0 +1,29 @@
+name: Anti-Cheating CI Gates
+
+on:
+  pull_request:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  anti-cheat-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install root dependencies
+        run: npm ci
+      - name: Gate 1 - No placeholders
+        run: bash scripts/ci/no_placeholders.sh
+      - name: Gate 2 - Tool contract schema validation
+        run: npx tsx scripts/ci/tool_schema_validate.ts
+      - name: Gate 3 - Evidence required
+        run: npx tsx scripts/ci/evidence_required_test.ts
+      - name: Gate 4 - Strict enforcement
+        run: bash scripts/ci/strict_enforce_test.sh
+      - name: Gate 6 - No silent override
+        run: bash scripts/ci/no_silent_override.sh
+      - name: Gate 7 - Golden corpus presence
+        run: npx tsx scripts/ci/golden_corpus_runner.ts
